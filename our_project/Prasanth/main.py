@@ -8,10 +8,10 @@ import os
 from graph_process import convert_to_networkGraphs
 import random
 from params import *
+from helper import *
+from train import *
+tf.enable_eager_execution()
 
-
-def debug(*args,**kwargs):
-    print(*args,file=sys.stderr,**kwargs)
 
 
 input_file = sys.argv[1]
@@ -39,4 +39,18 @@ debug(graphTrain)
 '''
 
 # adjacency matrices
+MAX_NODES = getMaxNodes(nGraphList)
+
+all_adj_matrices = getAdjMatList(graphTrain[:len(graphTrain)-len(graphTrain)%BATCH_SIZE])
+X,Y,len_list= makeRNN_IO(all_adj_matrices)
+tf_data1 = tf.data.Dataset.from_tensor_slices(np.array(X))
+tf_data2 = tf.data.Dataset.from_tensor_slices(np.array(Y))
+tf_data3 = tf.data.Dataset.from_tensor_slices(np.array(len_list))
+tf_data4 = tf.data.Dataset.zip((tf_data1,tf_data2,tf_data3)).shuffle(5).batch(BATCH_SIZE)
+
+modelA = makeRNN_model()
+modelB = makeRNN_model()
+
+train(tf_data4,modelA,modelB)
+
 

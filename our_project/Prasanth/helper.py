@@ -13,5 +13,8 @@ return : max nuber of Nodes in graphs list
 def getMaxNodes(graph_list):
     return max([len(g.nodes()) for g in graph_list])
 
+def debug(*args,**kwargs):
+    print(*args,file=sys.stderr,**kwargs)
+
 if '__name__'=='__main__':
     pass
