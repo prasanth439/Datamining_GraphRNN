@@ -1,10 +1,24 @@
+from __future__ import absolute_import,division,print_function,unicode_literals
 import networkx as nx
 import numpy as np
+import tensorflow as tf 
+from helper import *
+import random
+from params import HISTORY_ITERATIONS,MAX_NODES,HISTORY
 
-"""
+'''
+graph : network graph
+return : list of nodes traversed in bfs
+'''
+def get_bfs_seq(graph):
+  bfs_seq = []
+  return bfs_seq
+
+
+'''
 datafile : string of file name
 returns : graph list
-"""
+'''
 def convert_to_networkGraphs(data_file=None):
     if(data_file==None):
       print("No given datafile")
@@ -92,3 +106,52 @@ def convert_to_networkGraphs(data_file=None):
 
     
     return graphs
+
+'''
+params : network graphs
+returns : adjacency matrices from network graphs
+'''
+def getAdjMatList(graphList):
+  adj_list = []
+  for g in graphList:
+    adj_list.append(getAdjMatNormal(g))
+  return adj_list
+
+'''
+params : adjMatrices
+returns : maxHistory
+'''
+def calculateHistory(adjMatrices):
+  history = 0
+  numMatrices = len(adjMatrices) #number of matrices
+  for iter in range(HISTORY_ITERATIONS):
+    mat_id = random.randint(0,numMatrices)
+    adj_dup = adjMatrices[mat_id].copy()
+    node_indexes = [i for i in range(len(adj_dup))]
+    per_node_indexes = np.random.permutation(node_indexes) # permuted node indexex
+    adj_dup = adj_dup[np.ix_(per_node_indexes,per_node_indexes)]
+    node_index = random.randint(0,len(adj_dup))
+    G = nx.from_np(adj_dup)
+    bfs_seq = get_bfs_seq(G,node_index)
+    adj_dup = adj_dup[np.ix_(bfs_seq,bfs_seq)]
+    encoded_matrix = get_encode_variable(adj_dup.copy())
+    local_history = max([len(row) for row in encoded_matrix])
+    history = max(history,local_history)
+  return history
+'''
+params : adjMatrices
+returns : input output pairs of graphs
+'''
+def makeRNN_IO(adjMatrices):
+  io_list = []
+  for adj_ in adjMatrices:
+    data_x = np.zeros(MAX_NODES,HISTORY)
+    data_y = np.zeros(MAX_NODES,HISTORY)
+    data_len = len(adj_)
+
+  return io_list
+
+def makeBatches():
+  
+
+
