@@ -1,4 +1,5 @@
 from train import *
+from graph_process import convert_to_networkGraphs
 
 if __name__ == '__main__':
     # All necessary arguments are defined in args.py
@@ -7,6 +8,7 @@ if __name__ == '__main__':
     time = strftime("%Y-%m-%d %H:%M:%S", gmtime())
 
     graphs = create_graphs.create(args)
+    graphs = convert_to_networkGraphs(input_file)
     if not os.path.isdir(args.model_save_path):
         os.makedirs(args.model_save_path)
     if not os.path.isdir(args.graph_save_path):
@@ -17,8 +19,6 @@ if __name__ == '__main__':
         os.makedirs(args.timing_save_path)
     if not os.path.isdir(args.figure_prediction_save_path):
         os.makedirs(args.figure_prediction_save_path)
-    if not os.path.isdir(args.nll_save_path):
-        os.makedirs(args.nll_save_path)
 
     # split datasets
     random.seed(123)

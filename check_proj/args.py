@@ -2,45 +2,10 @@
 ### program configuration
 class Args():
     def __init__(self):
-        ### if clean tensorboard
-        self.clean_tensorboard = False
-        ### Which CUDA GPU device is used for training
-        self.cuda = 1
-
-        ### Which GraphRNN model variant is used.
-        # The simple version of Graph RNN
-        # self.note = 'GraphRNN_MLP'
-        # The dependent Bernoulli sequence version of GraphRNN
         self.note = 'GraphRNN_RNN'
-
-        ## for comparison, removing the BFS compoenent
-        # self.note = 'GraphRNN_MLP_nobfs'
-        # self.note = 'GraphRNN_RNN_nobfs'
-
-        ### Which dataset is used to train the model
-        # self.graph_type = 'DD'
-        # self.graph_type = 'caveman'
-        # self.graph_type = 'caveman_small'
-        # self.graph_type = 'caveman_small_single'
-        # self.graph_type = 'community4'
-        # self.graph_type = 'grid'
-        # self.graph_type = 'grid_small'
-        # self.graph_type = 'ladder_small'
-
-        # self.graph_type = 'enzymes'
-        # self.graph_type = 'enzymes_small'
-        # self.graph_type = 'barabasi'
-        # self.graph_type = 'barabasi_small'
-        # self.graph_type = 'citeseer'
-        # self.graph_type = 'citeseer_small'
         self.graph_type = 'protein'
-
-        # self.graph_type = 'barabasi_noise'
-        # self.noise = 10
-        #
-        # if self.graph_type == 'barabasi_noise':
-        #     self.graph_type = self.graph_type+str(self.noise)
-
+        #ours
+        self.input_file = 'dataset/50_graph.txt'
         # if none, then auto calculate
         self.max_num_node = None # max number of nodes in a graph
         self.max_prev_node = None # max previous node that looks back
@@ -85,7 +50,6 @@ class Args():
         self.figure_save_path = self.dir_input+'figures/'
         self.timing_save_path = self.dir_input+'timing/'
         self.figure_prediction_save_path = self.dir_input+'figures_prediction/'
-        self.nll_save_path = self.dir_input+'nll/'
 
 
         self.load = False # if load model, default lr is very low
