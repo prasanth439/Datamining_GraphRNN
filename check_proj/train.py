@@ -116,7 +116,7 @@ def train_rnn_epoch(epoch, args, rnn, output, data_loader,
 
         # logging
         # print(shape(loss.data))
-        log_value('loss_'+args.fname, loss.data, epoch*args.batch_ratio+batch_idx)
+        # log_value('loss_'+args.fname, loss.data, epoch*args.batch_ratio+batch_idx)
         feature_dim = y.size(1)*y.size(2)
         loss_sum += loss.data*feature_dim
     return loss_sum/(batch_idx+1)
