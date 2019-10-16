@@ -7,7 +7,7 @@ if __name__ == '__main__':
 
     time = strftime("%Y-%m-%d %H:%M:%S", gmtime())
 
-    graphs = create_graphs.create(args)
+    graphs = create_graphs.create(args.input_file)
     graphs = convert_to_networkGraphs(input_file)
     if not os.path.isdir(args.model_save_path):
         os.makedirs(args.model_save_path)
