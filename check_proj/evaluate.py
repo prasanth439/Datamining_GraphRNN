@@ -660,6 +660,7 @@ if __name__ == '__main__':
     elif not prog_args.test_file == '':
         # evaluate single .dat file containing list of test graphs (networkx format)
         graphs = utils.load_graph_list(prog_args.test_file)
+        graphs = graphs[:20]
         eval_single_list(graphs, dir_input=dir_prefix+'graphs/', dataset_name='protein')
     ## if you don't try kronecker, only the following part is needed
     else:
