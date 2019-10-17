@@ -318,7 +318,7 @@ def convert_to_networkGraphs(data_file=None):
         graph["nodelist"] = nodelist_graph
         graph["edgelist"] = edgelist_graph
         graphstable.append(graph)
-        print(graph)
+        # print(graph)
         #sys.exit()
         edgelist_graph_tuple = list(map(tuple,edgelist_graph))
         G.add_edges_from(edgelist_graph_tuple)

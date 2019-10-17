@@ -8,7 +8,7 @@ class Args():
         self.input_file = 'dataset/50_graph.txt'
         # if none, then auto calculate
         self.max_num_node = None # max number of nodes in a graph
-        self.max_prev_node = None # max previous node that looks back
+        self.max_prev_node = 23 # max previous node that looks back
 
         ### network config
         ## GraphRNN
