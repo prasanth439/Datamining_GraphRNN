@@ -19,144 +19,6 @@ from utils import *
 
 
 
-
-# load ENZYMES and PROTEIN and DD dataset
-def Graph_load_batch(min_num_nodes = 20, max_num_nodes = 1000, name = 'ENZYMES',node_attributes = True,graph_labels=True):
-    '''
-    load many graphs, e.g. enzymes
-    :return: a list of graphs
-    '''
-    print('Loading graph dataset: '+str(name))
-    G = nx.Graph()
-    # load data
-    path = 'dataset/'+name+'/'
-    data_adj = np.loadtxt(path+name+'_A.txt', delimiter=',').astype(int)
-    if node_attributes:
-        data_node_att = np.loadtxt(path+name+'_node_attributes.txt', delimiter=',')
-    data_node_label = np.loadtxt(path+name+'_node_labels.txt', delimiter=',').astype(int)
-    data_graph_indicator = np.loadtxt(path+name+'_graph_indicator.txt', delimiter=',').astype(int)
-    if graph_labels:
-        data_graph_labels = np.loadtxt(path+name+'_graph_labels.txt', delimiter=',').astype(int)
-
-
-    data_tuple = list(map(tuple, data_adj))
-    print(data_tuple[0:100])
-    print(data_tuple[0])
-
-    # add edges
-    G.add_edges_from(data_tuple)
-    # add node attributes
-    for i in range(data_node_label.shape[0]):
-        if node_attributes:
-            G.add_node(i+1, feature = data_node_att[i])
-        G.add_node(i+1, label = data_node_label[i])
-    G.remove_nodes_from(list(nx.isolates(G)))
-
-    # print(G.number_of_nodes())
-    # print(G.number_of_edges())
-
-    # split into graphs
-    graph_num = data_graph_indicator.max()
-    node_list = np.arange(data_graph_indicator.shape[0])+1
-    graphs = []
-    max_nodes = 0
-    for i in range(graph_num):
-        # find the nodes for each graph
-        nodes = node_list[data_graph_indicator==i+1]
-        G_sub = G.subgraph(nodes)
-        if graph_labels:
-            G_sub.graph['label'] = data_graph_labels[i]
-        # print('nodes', G_sub.number_of_nodes())
-        # print('edges', G_sub.number_of_edges())
-        # print('label', G_sub.graph)
-        if G_sub.number_of_nodes()>=min_num_nodes and G_sub.number_of_nodes()<=max_num_nodes:
-            graphs.append(G_sub)
-            if G_sub.number_of_nodes() > max_nodes:
-                max_nodes = G_sub.number_of_nodes()
-            # print(G_sub.number_of_nodes(), 'i', i)
-    # print('Graph dataset name: {}, total graph num: {}'.format(name, len(graphs)))
-    # logging.warning('Graphs loaded, total num: {}'.format(len(graphs)))
-    print('Loaded')
-    return graphs
-
-def test_graph_load_DD():
-    graphs, max_num_nodes = Graph_load_batch(min_num_nodes=10,name='DD',node_attributes=False,graph_labels=True)
-    shuffle(graphs)
-    plt.switch_backend('agg')
-    plt.hist([len(graphs[i]) for i in range(len(graphs))], bins=100)
-    plt.savefig('figures/test.png')
-    plt.close()
-    row = 4
-    col = 4
-    draw_graph_list(graphs[0:row*col], row=row,col=col, fname='figures/test')
-    print('max num nodes',max_num_nodes)
-
-
-def parse_index_file(filename):
-    index = []
-    for line in open(filename):
-        index.append(int(line.strip()))
-    return index
-
-# load cora, citeseer and pubmed dataset
-def Graph_load(dataset = 'cora'):
-    '''
-    Load a single graph dataset
-    :param dataset: dataset name
-    :return:
-    '''
-    names = ['x', 'tx', 'allx', 'graph']
-    objects = []
-    for i in range(len(names)):
-        load = pkl.load(open("dataset/ind.{}.{}".format(dataset, names[i]), 'rb'), encoding='latin1')
-        # print('loaded')
-        objects.append(load)
-        # print(load)
-    x, tx, allx, graph = tuple(objects)
-    test_idx_reorder = parse_index_file("dataset/ind.{}.test.index".format(dataset))
-    test_idx_range = np.sort(test_idx_reorder)
-
-    if dataset == 'citeseer':
-        # Fix citeseer dataset (there are some isolated nodes in the graph)
-        # Find isolated nodes, add them as zero-vecs into the right position
-        test_idx_range_full = range(min(test_idx_reorder), max(test_idx_reorder) + 1)
-        tx_extended = sp.lil_matrix((len(test_idx_range_full), x.shape[1]))
-        tx_extended[test_idx_range - min(test_idx_range), :] = tx
-        tx = tx_extended
-
-    features = sp.vstack((allx, tx)).tolil()
-    features[test_idx_reorder, :] = features[test_idx_range, :]
-    G = nx.from_dict_of_lists(graph)
-    adj = nx.adjacency_matrix(G)
-    return adj, features, G
-
-
-######### code test ########
-# adj, features,G = Graph_load()
-# print(adj)
-# print(G.number_of_nodes(), G.number_of_edges())
-
-# _,_,G = Graph_load(dataset='citeseer')
-# G = max(nx.connected_component_subgraphs(G), key=len)
-# G = nx.convert_node_labels_to_integers(G)
-#
-# count = 0
-# max_node = 0
-# for i in range(G.number_of_nodes()):
-#     G_ego = nx.ego_graph(G, i, radius=3)
-#     # draw_graph(G_ego,prefix='test'+str(i))
-#     m = G_ego.number_of_nodes()
-#     if m>max_node:
-#         max_node = m
-#     if m>=50:
-#         print(i, G_ego.number_of_nodes(), G_ego.number_of_edges())
-#         count += 1
-# print('count', count)
-# print('max_node', max_node)
-
-
-
-
 def bfs_seq(G, start_id):
     '''
     get a bfs node sequence
@@ -275,37 +137,6 @@ def decode_adj_flexible(adj_output):
 
     return adj_full
 
-def test_encode_decode_adj():
-######## code test ###########
-    G = nx.ladder_graph(5)
-    G = nx.grid_2d_graph(20,20)
-    G = nx.ladder_graph(200)
-    G = nx.karate_club_graph()
-    G = nx.connected_caveman_graph(2,3)
-    print(G.number_of_nodes())
-    
-    adj = np.asarray(nx.to_numpy_matrix(G))
-    G = nx.from_numpy_matrix(adj)
-    #
-    start_idx = np.random.randint(adj.shape[0])
-    x_idx = np.array(bfs_seq(G, start_idx))
-    adj = adj[np.ix_(x_idx, x_idx)]
-    
-    print('adj\n',adj)
-    adj_output = encode_adj(adj,max_prev_node=5)
-    print('adj_output\n',adj_output)
-    adj_recover = decode_adj(adj_output,max_prev_node=5)
-    print('adj_recover\n',adj_recover)
-    print('error\n',np.amin(adj_recover-adj),np.amax(adj_recover-adj))
-    
-    
-    adj_output = encode_adj_flexible(adj)
-    for i in range(len(adj_output)):
-        print(len(adj_output[i]))
-    adj_recover = decode_adj_flexible(adj_output)
-    print(adj_recover)
-    print(np.amin(adj_recover-adj),np.amax(adj_recover-adj))
-
 
 
 def encode_adj_full(adj):
@@ -354,29 +185,6 @@ def decode_adj_full(adj_output):
         adj[i+1,output_start:output_end] = adj_slice[::-1] # put in reverse order
     adj = adj + adj.T
     return adj
-
-def test_encode_decode_adj_full():
-########### code test #############
-    # G = nx.ladder_graph(10)
-    G = nx.karate_club_graph()
-    # get bfs adj
-    adj = np.asarray(nx.to_numpy_matrix(G))
-    G = nx.from_numpy_matrix(adj)
-    start_idx = np.random.randint(adj.shape[0])
-    x_idx = np.array(bfs_seq(G, start_idx))
-    adj = adj[np.ix_(x_idx, x_idx)]
-    
-    adj_output, adj_len = encode_adj_full(adj)
-    print('adj\n',adj)
-    print('adj_output[0]\n',adj_output[:,:,0])
-    print('adj_output[1]\n',adj_output[:,:,1])
-    # print('adj_len\n',adj_len)
-    
-    adj_recover = decode_adj_full(adj_output)
-    print('adj_recover\n', adj_recover)
-    print('error\n',adj_recover-adj)
-    print('error_sum\n',np.amax(adj_recover-adj), np.amin(adj_recover-adj))
-
 
 
 
@@ -453,8 +261,3 @@ class Graph_sequence_sampler_pytorch(torch.utils.data.Dataset):
             max_prev_node.append(max_encoded_len)
         max_prev_node = sorted(max_prev_node)[-1*topk:]
         return max_prev_node
-
-
-
-
-
