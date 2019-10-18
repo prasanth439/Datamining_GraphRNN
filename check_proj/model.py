@@ -21,8 +21,8 @@ import time
 
 
 def binary_cross_entropy_weight(y_pred, y,has_weight=False, weight_length=1, weight_max=10):
-    '''
 
+    '''
     :param y_pred:
     :param y:
     :param weight_length: how long until the end of sequence shall we add weight
@@ -40,65 +40,7 @@ def binary_cross_entropy_weight(y_pred, y,has_weight=False, weight_length=1, wei
     return loss
 
 
-def sample_tensor(y,sample=True, thresh=0.5):
-    # do sampling
-    if sample:
-        y_thresh = Variable(torch.rand(y.size())).cuda()
-        y_result = torch.gt(y,y_thresh).float()
-    # do max likelihood based on some threshold
-    else:
-        y_thresh = Variable(torch.ones(y.size())*thresh).cuda()
-        y_result = torch.gt(y, y_thresh).float()
-    return y_result
 
-def gumbel_softmax(logits, temperature, eps=1e-9):
-    '''
-
-    :param logits: shape: N*L
-    :param temperature:
-    :param eps:
-    :return:
-    '''
-    # get gumbel noise
-    noise = torch.rand(logits.size())
-    noise.add_(eps).log_().neg_()
-    noise.add_(eps).log_().neg_()
-    noise = Variable(noise).cuda()
-
-    x = (logits + noise) / temperature
-    x = F.softmax(x)
-    return x
-
-# for i in range(10):
-#     x = Variable(torch.randn(1,10)).cuda()
-#     y = gumbel_softmax(x, temperature=0.01)
-#     print(x)
-#     print(y)
-#     _,id = y.topk(1)
-#     print(id)
-
-
-def gumbel_sigmoid(logits, temperature):
-    '''
-
-    :param logits:
-    :param temperature:
-    :param eps:
-    :return:
-    '''
-    # get gumbel noise
-    noise = torch.rand(logits.size()) # uniform(0,1)
-    noise_logistic = torch.log(noise)-torch.log(1-noise) # logistic(0,1)
-    noise = Variable(noise_logistic).cuda()
-
-    x = (logits + noise) / temperature
-    x = F.sigmoid(x)
-    return x
-
-# x = Variable(torch.randn(100)).cuda()
-# y = gumbel_sigmoid(x,temperature=0.01)
-# print(x)
-# print(y)
 
 def sample_sigmoid(y, sample, thresh=0.5, sample_time=2):
     '''
@@ -135,74 +77,6 @@ def sample_sigmoid(y, sample, thresh=0.5, sample_time=2):
         y_result = torch.gt(y, y_thresh).float()
     return y_result
 
-
-def sample_sigmoid_supervised(y_pred, y, current, y_len, sample_time=2):
-    '''
-        do sampling over unnormalized score
-    :param y_pred: input
-    :param y: supervision
-    :param sample: Bool
-    :param thresh: if not sample, the threshold
-    :param sampe_time: how many times do we sample, if =1, do single sample
-    :return: sampled result
-    '''
-
-    # do sigmoid first
-    y_pred = F.sigmoid(y_pred)
-    # do sampling
-    y_result = Variable(torch.rand(y_pred.size(0), y_pred.size(1), y_pred.size(2))).cuda()
-    # loop over all batches
-    for i in range(y_result.size(0)):
-        # using supervision
-        if current<y_len[i]:
-            while True:
-                y_thresh = Variable(torch.rand(y_pred.size(1), y_pred.size(2))).cuda()
-                y_result[i] = torch.gt(y_pred[i], y_thresh).float()
-                # print('current',current)
-                # print('y_result',y_result[i].data)
-                # print('y',y[i])
-                y_diff = y_result[i].data-y[i]
-                if (y_diff>=0).all():
-                    break
-        # supervision done
-        else:
-            # do 'multi_sample' times sampling
-            for j in range(sample_time):
-                y_thresh = Variable(torch.rand(y_pred.size(1), y_pred.size(2))).cuda()
-                y_result[i] = torch.gt(y_pred[i], y_thresh).float()
-                if (torch.sum(y_result[i]).data>0).any():
-                    break
-    return y_result
-
-def sample_sigmoid_supervised_simple(y_pred, y, current, y_len, sample_time=2):
-    '''
-        do sampling over unnormalized score
-    :param y_pred: input
-    :param y: supervision
-    :param sample: Bool
-    :param thresh: if not sample, the threshold
-    :param sampe_time: how many times do we sample, if =1, do single sample
-    :return: sampled result
-    '''
-
-    # do sigmoid first
-    y_pred = F.sigmoid(y_pred)
-    # do sampling
-    y_result = Variable(torch.rand(y_pred.size(0), y_pred.size(1), y_pred.size(2))).cuda()
-    # loop over all batches
-    for i in range(y_result.size(0)):
-        # using supervision
-        if current<y_len[i]:
-            y_result[i] = y[i]
-        # supervision done
-        else:
-            # do 'multi_sample' times sampling
-            for j in range(sample_time):
-                y_thresh = Variable(torch.rand(y_pred.size(1), y_pred.size(2))).cuda()
-                y_result[i] = torch.gt(y_pred[i], y_thresh).float()
-                if (torch.sum(y_result[i]).data>0).any():
-                    break
-    return y_result
 
 ################### current adopted model, LSTM+MLP || LSTM+VAE || LSTM+LSTM (where LSTM can be GRU as well)
 #####
