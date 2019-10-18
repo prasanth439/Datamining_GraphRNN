@@ -35,7 +35,6 @@ debug(graphTrain)
 [1] Make history method 
 [2] create batches 
 [3] make RNN model (check dimensions)
-
 '''
 
 # adjacency matrices

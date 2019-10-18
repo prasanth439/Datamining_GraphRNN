@@ -7,6 +7,7 @@ import numpy as np
 params : unknown
 returns : RNN Model
 '''
-def makeRNN_model():
-    model = None
+def makeRNN_model(input_size, embedding_size, hidden_size, num_layers):
+    tf.keras.layers.Dense(embedding_size,input_shape=(input_size,)
+
     return model

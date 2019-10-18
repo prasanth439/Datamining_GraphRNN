@@ -268,7 +268,7 @@ class LSTM_plain(nn.Module):
 
 # plain GRU model
 class GRU_plain(nn.Module):
-    def __init__(self, input_size, embedding_size, hidden_size, num_layers, has_input=True, has_output=False, output_size=None):
+    def __init__(self, ty5):
         super(GRU_plain, self).__init__()
         self.num_layers = num_layers
         self.hidden_size = hidden_size
@@ -312,7 +312,7 @@ class GRU_plain(nn.Module):
             input = input_raw
         if pack:
             input = pack_padded_sequence(input, input_len, batch_first=True)
-        output_raw, self.hidden = self.rnn(input, self.hidden)
+        output_raw, self.hidden = self.r nn(input, self.hidden)
         if pack:
             output_raw = pad_packed_sequence(output_raw, batch_first=True)[0]
         if self.has_output:
