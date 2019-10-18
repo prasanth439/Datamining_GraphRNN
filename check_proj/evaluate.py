@@ -127,12 +127,9 @@ def load_ground_truth(dir_input, dataset_name, model_name='GraphRNN_RNN'):
         hidden = 128
     else:
         hidden = 64
-    if model_name=='Internal' or model_name=='Noise' or model_name=='B-A' or model_name=='E-R':
-        fname_test = dir_input + 'GraphRNN_MLP' + '_' + dataset_name + '_' + str(args.num_layers) + '_' + str(
-                hidden) + '_test_' + str(0) + '.dat'
-    else:
-        fname_test = dir_input + model_name + '_' + dataset_name + '_' + str(args.num_layers) + '_' + str(
-                hidden) + '_test_' + str(0) + '.dat'
+   
+    fname_test = dir_input + model_name + '_' + dataset_name + '_' + str(args.num_layers) + '_' + str(
+            hidden) + '_test_' + str(0) + '.dat'
     try:
         graph_test = utils.load_graph_list(fname_test,is_real=True)
     except:
@@ -650,27 +647,11 @@ if __name__ == '__main__':
         output_prefix = os.path.join(out_dir, prog_args.graph_type)
         print('Export ground truth to prefix: ', output_prefix)
 
-        if prog_args.graph_type == 'grid':
-            graphs = []
-            for i in range(10,20):
-                for j in range(10,20):
-                    graphs.append(nx.grid_2d_graph(i,j))
-            utils.export_graphs_to_txt(graphs, output_prefix)
-        elif prog_args.graph_type == 'caveman':
-            graphs = []
-            for i in range(2, 3):
-                for j in range(30, 81):
-                    for k in range(10):
-                        graphs.append(caveman_special(i,j, p_edge=0.3))
-            utils.export_graphs_to_txt(graphs, output_prefix)
-        elif prog_args.graph_type == 'citeseer':
-            graphs = utils.citeseer_ego()
-            utils.export_graphs_to_txt(graphs, output_prefix)
-        else:
-            # load from directory
-            input_path = dir_prefix + real_graph_filename
-            g_list = utils.load_graph_list(input_path)
-            utils.export_graphs_to_txt(g_list, output_prefix)
+
+        # load from directory
+        input_path = dir_prefix + real_graph_filename
+        g_list = utils.load_graph_list(input_path)
+        utils.export_graphs_to_txt(g_list, output_prefix)
     elif not prog_args.kron_dir == '':
         kron_g_list = process_kron(prog_args.kron_dir)
         fname = os.path.join(prog_args.kron_dir, prog_args.graph_type + '.dat')
@@ -679,7 +660,8 @@ if __name__ == '__main__':
     elif not prog_args.test_file == '':
         # evaluate single .dat file containing list of test graphs (networkx format)
         graphs = utils.load_graph_list(prog_args.test_file)
-        eval_single_list(graphs, dir_input=dir_prefix+'graphs/', dataset_name='grid')
+        graphs = graphs[:20]
+        eval_single_list(graphs, dir_input=dir_prefix+'graphs/', dataset_name='protein')
     ## if you don't try kronecker, only the following part is needed
     else:
         if not os.path.isdir(dir_prefix+'eval_results'):

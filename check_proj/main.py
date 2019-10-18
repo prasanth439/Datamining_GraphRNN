@@ -7,7 +7,6 @@ if __name__ == '__main__':
 
     time = strftime("%Y-%m-%d %H:%M:%S", gmtime())
 
-    # graphs = create_graphs.create(args.input_file)
     graphs = convert_to_networkGraphs(args.input_file)
     if not os.path.isdir(args.model_save_path):
         os.makedirs(args.model_save_path)
@@ -54,6 +53,10 @@ if __name__ == '__main__':
     print('max/min number edge: {}; {}'.format(max_num_edge,min_num_edge))
     print('max previous node: {}'.format(args.max_prev_node))
 
+    # save ground truth graphs
+    ## To get train and test set, after loading you need to manually slice
+    save_graph_list(graphs, args.graph_save_path + args.fname_train + '0.dat')
+    save_graph_list(graphs, args.graph_save_path + args.fname_test + '0.dat')
 
     dataset = Graph_sequence_sampler_pytorch(graphs_train,max_prev_node=args.max_prev_node,max_num_node=args.max_num_node)
     sample_strategy = torch.utils.data.sampler.WeightedRandomSampler([1.0 / len(dataset) for i in range(len(dataset))],
